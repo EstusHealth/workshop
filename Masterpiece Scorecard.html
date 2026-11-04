@@ -1,0 +1,641 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Masterpiece Scorecard</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800;900&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: casino-felt valuation desk. Inputs left, live "chip count" scoreboard pinned right, full report below. */
+:root{
+  --bg:#EAEFED; --surface:#FFFFFF; --surface-2:#F4F7F6; --ink:#13201C; --muted:#5A6A64; --line:#D2DCD8;
+  --felt:#0E5C47; --felt-ink:#FFFFFF; --felt-soft:#D9EAE3; --gold:#A87A1F; --gold-soft:#F3E7CC;
+  --good:#1F8A5B; --warn:#B9790B; --bad:#BF3F2B;
+  --display:"Big Shoulders Display", "Arial Narrow", Impact, sans-serif;
+  --body:"Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0C1311; --surface:#141E1B; --surface-2:#192521; --ink:#E7EFEB; --muted:#93A49E; --line:#263530;
+  --felt:#38B487; --felt-ink:#06120E; --felt-soft:#163128; --gold:#E0B451; --gold-soft:#3A2F17;
+  --good:#4CC38A; --warn:#E5A93A; --bad:#EA6B56; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#0C1311; --surface:#141E1B; --surface-2:#192521; --ink:#E7EFEB; --muted:#93A49E; --line:#263530;
+  --felt:#38B487; --felt-ink:#06120E; --felt-soft:#163128; --gold:#E0B451; --gold-soft:#3A2F17;
+  --good:#4CC38A; --warn:#E5A93A; --bad:#EA6B56; color-scheme:dark;}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;
+  padding-left:max(16px, env(safe-area-inset-left,0px));padding-right:max(16px, env(safe-area-inset-right,0px));}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;letter-spacing:.01em;line-height:1}
+.wrap{max-width:1240px;margin:0 auto;padding-block:28px 120px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);font-weight:600}
+.muted{color:var(--muted)}
+a{color:var(--felt)}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+/* hero */
+.hero{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:end;padding-bottom:22px;border-bottom:2px solid var(--ink);margin-bottom:24px}
+.hero h1{font-size:clamp(46px,8vw,92px);font-weight:900;text-transform:uppercase;line-height:.88;margin-top:8px}
+.hero h1 span{color:var(--felt)}
+.hero p{max-width:62ch;margin:14px 0 0;color:var(--muted)}
+.formula{font-family:var(--mono);font-size:13px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;min-width:0}
+.formula b{font-family:var(--display);font-size:30px;display:block;color:var(--ink);letter-spacing:.02em;line-height:1.1}
+.formula small{color:var(--muted)}
+
+.layout{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:28px;align-items:start}
+.inputs{display:grid;gap:22px;min-width:0}
+
+/* sections */
+.block{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px;min-width:0}
+.block-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.block-head h2{font-size:30px;font-weight:800;text-transform:uppercase}
+.block-head p{margin:4px 0 0;color:var(--muted);font-size:14px;max-width:60ch}
+.tag{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:99px;background:var(--felt-soft);color:var(--felt);font-weight:600;white-space:nowrap}
+.tag.gold{background:var(--gold-soft);color:var(--gold)}
+
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+.field{display:grid;gap:5px;min-width:0}
+.field label{font-size:13px;font-weight:600}
+.field .hint{font-size:12px;color:var(--muted)}
+.inbox{display:flex;align-items:center;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:0 10px;min-width:0}
+.inbox:focus-within{border-color:var(--felt)}
+.inbox span{font-family:var(--mono);color:var(--muted);font-size:14px}
+.inbox input{flex:1;min-width:0;border:0;background:transparent;color:var(--ink);font-family:var(--mono);font-size:17px;font-weight:600;padding:10px 6px;outline:none;font-variant-numeric:tabular-nums}
+
+.choice{border:0;padding:0;margin:0;display:grid;gap:8px;min-width:0}
+.choice + .choice{margin-top:16px;padding-top:16px;border-top:1px dashed var(--line)}
+.choice legend{font-weight:700;font-size:15px;padding:0;margin-bottom:2px;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.choice legend .num{font-family:var(--mono);font-size:12px;color:var(--gold);font-weight:600}
+.choice .why{font-size:13px;color:var(--muted);margin:-4px 0 4px}
+.seg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.seg.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label{display:flex;align-items:flex-start;gap:7px;padding:9px 10px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:13px;line-height:1.3;background:var(--surface-2);min-height:100%;transition:border-color .15s, background .15s}
+.seg label::before{content:"";flex:none;width:12px;height:12px;margin-top:2px;border-radius:50%;border:2px solid var(--muted)}
+.seg input:checked + label{border-color:var(--felt);background:var(--felt-soft);font-weight:600}
+.seg input:checked + label::before{border-color:var(--felt);background:var(--felt);box-shadow:inset 0 0 0 2px var(--felt-soft)}
+.seg input:focus-visible + label{outline:2px solid var(--gold);outline-offset:2px}
+.auto{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:10px 12px;border-radius:10px;background:var(--surface-2);font-size:13px}
+.auto b{font-family:var(--mono)}
+
+.cs{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.cs input{position:absolute;opacity:0;pointer-events:none}
+.cs label{display:grid;gap:2px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;cursor:pointer;background:var(--surface-2);font-size:12px;color:var(--muted)}
+.cs label b{font-size:14px;color:var(--ink)}
+.cs input:checked + label{border-color:var(--gold);background:var(--gold-soft)}
+.cs input:checked + label b::after{content:"  ✓";color:var(--gold)}
+.cs input:focus-visible + label{outline:2px solid var(--gold);outline-offset:2px}
+
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.btn{font-family:var(--display);font-weight:800;font-size:20px;letter-spacing:.04em;text-transform:uppercase;border:0;border-radius:999px;padding:12px 22px;cursor:pointer;background:var(--felt);color:var(--felt-ink)}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);font-size:16px}
+.btn:hover{filter:brightness(1.08)}
+
+/* scoreboard */
+.board{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px);display:grid;gap:14px}
+.chip{background:var(--felt);color:var(--felt-ink);border-radius:20px;padding:20px;position:relative;overflow:hidden}
+.chip::after{content:"";position:absolute;inset:8px;border:2px dashed color-mix(in srgb, var(--felt-ink) 35%, transparent);border-radius:14px;pointer-events:none}
+.chip .eyebrow{color:inherit;opacity:.8}
+.scorerow{display:flex;gap:16px;align-items:center;margin-top:8px;position:relative;z-index:1}
+.ring{flex:none;width:118px;height:118px}
+.ring .track{stroke:color-mix(in srgb, var(--felt-ink) 22%, transparent)}
+.ring .val{stroke:var(--gold);transition:stroke-dashoffset .9s cubic-bezier(.2,.8,.2,1)}
+.ring text{fill:var(--felt-ink);font-family:var(--display);font-weight:900}
+.tier{font-family:var(--display);font-weight:900;font-size:40px;text-transform:uppercase;line-height:.9}
+.tierline{font-size:13px;opacity:.85;margin-top:6px}
+.stamp{animation:none}
+.stamp.go{animation:stamp .55s cubic-bezier(.2,1.6,.4,1)}
+@keyframes stamp{0%{transform:scale(1.8) rotate(-6deg);opacity:0}100%{transform:none;opacity:1}}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.ev{display:grid;grid-template-columns:150px minmax(0,1fr);gap:12px;align-items:center}
+.ev .big{font-family:var(--display);font-weight:900;font-size:44px;line-height:.9;font-variant-numeric:tabular-nums}
+.ev .sub{font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:6px}
+.gauge text{font-family:var(--mono);font-size:9px;fill:var(--muted)}
+.gauge .needle{transition:transform .9s cubic-bezier(.2,.8,.2,1);transform-origin:110px 108px}
+.upside{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);font-size:13px}
+.upside b{font-family:var(--mono);color:var(--good)}
+
+.constraint h3{font-size:24px;text-transform:uppercase;font-weight:800;margin:6px 0 4px}
+.constraint p{margin:0;font-size:14px}
+.pill{display:inline-flex;gap:6px;align-items:center;font-family:var(--mono);font-size:12px;font-weight:600;padding:4px 10px;border-radius:99px}
+.pill.good{background:color-mix(in srgb, var(--good) 16%, transparent);color:var(--good)}
+.pill.warn{background:color-mix(in srgb, var(--warn) 18%, transparent);color:var(--warn)}
+.pill.bad{background:color-mix(in srgb, var(--bad) 16%, transparent);color:var(--bad)}
+.pushrow{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+.pushrow .word{font-family:var(--display);font-weight:900;font-size:32px;text-transform:uppercase;line-height:1}
+
+/* report */
+.report{margin-top:40px}
+.report > h2{font-size:clamp(36px,6vw,60px);text-transform:uppercase;font-weight:900;border-bottom:2px solid var(--ink);padding-bottom:10px;margin-bottom:20px}
+.grid3{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr) minmax(0,1fr);gap:20px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px;min-width:0}
+.panel h3{font-size:24px;text-transform:uppercase;font-weight:800}
+.panel .lede{font-size:13px;color:var(--muted);margin:4px 0 12px}
+.radar{width:100%;height:auto;display:block}
+.radar .grid{fill:none;stroke:var(--line)}
+.radar .spoke{stroke:var(--line)}
+.radar .shape{fill:color-mix(in srgb, var(--felt) 28%, transparent);stroke:var(--felt);stroke-width:2}
+.radar .pt{fill:var(--felt);stroke:var(--surface);stroke-width:1.5}
+.radar .lbl{font-family:var(--mono);font-size:10px;fill:var(--muted)}
+.radar .ringlbl{font-family:var(--mono);font-size:8px;fill:var(--muted)}
+.bars{display:grid;gap:12px}
+.bar{display:grid;gap:5px}
+.bar .top{display:flex;justify-content:space-between;gap:8px;font-size:13px}
+.bar .top b{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.track{height:10px;border-radius:99px;background:var(--surface-2);border:1px solid var(--line);overflow:hidden}
+.fill{height:100%;border-radius:99px;transition:width .8s cubic-bezier(.2,.8,.2,1)}
+.fill.good{background:var(--good)} .fill.warn{background:var(--warn)} .fill.bad{background:var(--bad)} .fill.felt{background:var(--felt)}
+.bar small{color:var(--muted);font-size:12px}
+
+.method{margin-top:28px;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px}
+.method .panel p,.method .panel li{font-size:14px}
+.method ul{padding-left:18px;margin:8px 0 0}
+.bands{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:10px}
+.bands div{border-radius:8px;padding:8px;font-size:12px;background:var(--surface-2)}
+.bands b{display:block;font-family:var(--mono);font-size:13px}
+.sources{margin-top:28px;font-size:13px;color:var(--muted)}
+.sources ol{padding-left:18px}
+
+/* mobile mini bar */
+.mini{display:none}
+@media (max-width:980px){
+  .layout{grid-template-columns:minmax(0,1fr)}
+  .board{position:static}
+  .grid3{grid-template-columns:minmax(0,1fr)}
+  .mini{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:20;gap:12px;align-items:center;justify-content:space-between;
+    background:var(--felt);color:var(--felt-ink);
+    padding:10px max(16px, env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(16px, env(safe-area-inset-left,0px));}
+  .mini b{font-family:var(--display);font-size:26px;font-weight:900;line-height:1}
+  .mini span{font-family:var(--mono);font-size:12px;opacity:.85}
+  .mini button{font-family:var(--display);font-weight:800;text-transform:uppercase;font-size:16px;border:0;border-radius:99px;padding:8px 14px;background:var(--felt-ink);color:var(--felt);cursor:pointer}
+}
+@media (max-width:620px){
+  .hero{grid-template-columns:minmax(0,1fr)}
+  .seg{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .seg.three{grid-template-columns:minmax(0,1fr)}
+  .ev{grid-template-columns:minmax(0,1fr)}
+  .ev svg{max-width:220px}
+  .bands{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:50;width:100%;height:100%}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<canvas id="confetti" hidden></canvas>
+
+<div class="wrap">
+  <header class="hero">
+    <div>
+      <div class="eyebrow">Acquisition.com Scaling Workshop · Value Acceleration Method</div>
+      <h1>Masterpiece <span>Scorecard</span></h1>
+      <p>The workshop scores your business like an investor would: how much it earns, how fast it grows, and how risky that money is. Plug in your numbers, rate the ten pieces of a masterpiece business, and see your multiple and enterprise value.</p>
+    </div>
+    <div class="formula">
+      <small>The whole game, on one line</small>
+      <b>EV = EBITDA × Multiple</b>
+      <small>Adders grow EBITDA. Fewer detractors grow the multiple.</small>
+    </div>
+  </header>
+
+  <div class="layout">
+    <form class="inputs" id="form" autocomplete="off" onsubmit="return false">
+
+      <section class="block">
+        <div class="block-head">
+          <div><h2>1 · The six value adders</h2>
+          <p>What buyers pay for, in workshop order. Last 12 months. Type 2.4m or 480k if easier.</p></div>
+          <span class="tag gold">Example numbers</span>
+        </div>
+        <div class="fields">
+          <div class="field"><label for="rev">Revenue</label><div class="inbox"><span>$</span><input id="rev" inputmode="decimal" data-money></div></div>
+          <div class="field"><label for="growth">Revenue growth</label><div class="inbox"><input id="growth" type="number" step="1"><span>% / yr</span></div></div>
+          <div class="field"><label for="ebitda">EBITDA</label><div class="inbox"><span>$</span><input id="ebitda" inputmode="decimal" data-money></div><span class="hint">Real profit. Strip personal expenses.</span></div>
+          <div class="field"><label for="retention">Revenue retention</label><div class="inbox"><input id="retention" type="number" step="1"><span>%</span></div><span class="hint">Last year's customers' revenue kept this year.</span></div>
+          <div class="field"><label for="ltv">LTV (gross profit)</label><div class="inbox"><span>$</span><input id="ltv" inputmode="decimal" data-money></div><span class="hint">Lifetime gross profit, not revenue.</span></div>
+          <div class="field"><label for="cac">CAC (all in)</label><div class="inbox"><span>$</span><input id="cac" inputmode="decimal" data-money></div><span class="hint">Ads, sales pay, agency, tools ÷ new customers.</span></div>
+        </div>
+      </section>
+
+      <section class="block">
+        <div class="block-head">
+          <div><h2>2 · The value detractors</h2>
+          <p>Risks that shrink your multiple. Same EBITDA, very different price.</p></div>
+        </div>
+        <div class="fields">
+          <div class="field"><label for="bigcust">Biggest customer or referrer</label><div class="inbox"><input id="bigcust" type="number" step="1" min="0" max="100"><span>% of revenue</span></div><span class="hint">Workshop line: over 20% is a red flag.</span></div>
+          <div class="field"><label for="topchan">Top acquisition channel</label><div class="inbox"><input id="topchan" type="number" step="1" min="0" max="100"><span>% of new clients</span></div><span class="hint">Over ~70% from one source is a bet.</span></div>
+        </div>
+        <fieldset class="choice" style="margin-top:16px">
+          <legend>Market</legend>
+          <p class="why">Is your total addressable market growing, flat or shrinking?</p>
+          <div class="seg three">
+            <input type="radio" name="market" id="m2" value="2"><label for="m2">Growing</label>
+            <input type="radio" name="market" id="m1" value="1"><label for="m1">Flat</label>
+            <input type="radio" name="market" id="m0" value="0"><label for="m0">Shrinking</label>
+          </div>
+        </fieldset>
+        <fieldset class="choice">
+          <legend>Unicorn employee</legend>
+          <p class="why">Anyone you could not lose without real damage? Count yourself out of this one.</p>
+          <div class="seg three">
+            <input type="radio" name="unicorn" id="u2" value="2"><label for="u2">Nobody irreplaceable</label>
+            <input type="radio" name="unicorn" id="u1" value="1"><label for="u1">One person</label>
+            <input type="radio" name="unicorn" id="u0" value="0"><label for="u0">Several people</label>
+          </div>
+        </fieldset>
+      </section>
+
+      <section class="block">
+        <div class="block-head">
+          <div><h2>3 · Ten pieces of a masterpiece</h2>
+          <p>Hormozi's Mona Lisa list. Each one unlocks a higher level of enterprise value. Pick where you are today, not where you plan to be.</p></div>
+        </div>
+        <div id="pieces"></div>
+      </section>
+
+      <section class="block">
+        <div class="block-head">
+          <div><h2>4 · The 9 C's of stickiness</h2>
+          <p>Tick the retention levers you genuinely have working today. Feeds your recurring revenue score.</p></div>
+          <span class="tag" id="csCount">0 / 9</span>
+        </div>
+        <div class="cs" id="cs"></div>
+      </section>
+
+      <div class="actions">
+        <button type="button" class="btn" id="reveal">Reveal my score</button>
+        <button type="button" class="btn ghost" id="reset">Reset to example</button>
+      </div>
+    </form>
+
+    <aside class="board" aria-live="polite">
+      <div class="chip">
+        <div class="eyebrow">Masterpiece score</div>
+        <div class="scorerow">
+          <svg class="ring" viewBox="0 0 120 120" aria-hidden="true">
+            <circle class="track" cx="60" cy="60" r="50" fill="none" stroke-width="10"/>
+            <circle class="val" id="ringVal" cx="60" cy="60" r="50" fill="none" stroke-width="10" stroke-linecap="round" transform="rotate(-90 60 60)" stroke-dasharray="314.16" stroke-dashoffset="314.16"/>
+            <text id="ringNum" x="60" y="70" text-anchor="middle" font-size="38">0</text>
+          </svg>
+          <div style="min-width:0">
+            <div class="tier stamp" id="tier">Blank canvas</div>
+            <div class="tierline" id="tierline"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="ev">
+          <svg class="gauge" viewBox="0 0 220 128" aria-hidden="true">
+            <path d="M20 108 A90 90 0 0 1 200 108" fill="none" stroke="var(--line)" stroke-width="14" stroke-linecap="round"/>
+            <path id="gArc" d="M20 108 A90 90 0 0 1 200 108" fill="none" stroke="var(--gold)" stroke-width="14" stroke-linecap="round" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100" style="transition:stroke-dashoffset .9s cubic-bezier(.2,.8,.2,1)"/>
+            <g id="gTicks"></g>
+            <g class="needle" id="needle"><line x1="110" y1="108" x2="40" y2="108" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/><circle cx="110" cy="108" r="6" fill="var(--ink)"/></g>
+          </svg>
+          <div style="min-width:0">
+            <div class="eyebrow" style="color:var(--muted)">Est. enterprise value</div>
+            <div class="big" id="ev">$0</div>
+            <div class="sub" id="evsub"></div>
+          </div>
+        </div>
+        <div class="upside" id="upside"></div>
+      </div>
+
+      <div class="card constraint">
+        <div class="pushrow"><span class="eyebrow">Your #1 constraint</span><span class="pill warn" id="mBucket">Manpower</span></div>
+        <h3 id="cTitle"></h3>
+        <p id="cAction"></p>
+      </div>
+
+      <div class="card">
+        <div class="pushrow">
+          <div><div class="eyebrow" style="color:var(--muted)">LTV : CAC verdict</div><div class="word" id="pushWord">Push</div></div>
+          <span class="pill" id="ratioPill">0 : 1</span>
+        </div>
+        <p class="muted" style="margin:8px 0 0;font-size:13px" id="pushText"></p>
+      </div>
+    </aside>
+  </div>
+
+  <section class="report" id="report">
+    <h2>The full read</h2>
+    <div class="grid3">
+      <div class="panel">
+        <h3>The painting</h3>
+        <p class="lede">Your ten masterpiece pieces. Dents in the shape are the holes in the painting.</p>
+        <svg class="radar" id="radar" viewBox="0 0 400 360" role="img" aria-label="Radar chart of the ten masterpiece elements"></svg>
+      </div>
+      <div class="panel">
+        <h3>Value adders</h3>
+        <p class="lede">Grow these and EBITDA grows.</p>
+        <div class="bars" id="adders"></div>
+      </div>
+      <div class="panel">
+        <h3>Risk check</h3>
+        <p class="lede">Fix these and the multiple grows. Longer bar means safer.</p>
+        <div class="bars" id="risks"></div>
+      </div>
+    </div>
+
+    <div class="method">
+      <div class="panel">
+        <h3>How the workshop scores</h3>
+        <p>Day 1 has you work through a scorecard in the workbook to land on your current enterprise value. The logic underneath: value rises with more customers and more lifetime gross profit per customer, and falls with risk.</p>
+        <ul>
+          <li><b>Six value adders:</b> revenue, revenue growth, EBITDA, EBITDA margin, revenue retention, LTV:CAC.</li>
+          <li><b>Value detractors:</b> key person, unicorn employee, key customer, single channel, market and data risk.</li>
+          <li><b>Ten masterpiece pieces:</b> leadership team, marketing and delivery without the founder, multiple channels, recurring revenue, diverse customers, automated metrics, cash flow with growth, audit-ready books, $5M+ EBITDA.</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>LTV : CAC bands</h3>
+        <p>LTV is lifetime gross profit, CAC is fully loaded. The ratio decides whether you push spend or pause and refine.</p>
+        <div class="bands">
+          <div><b>&lt; 3:1</b>Stop. Fix the offer.</div>
+          <div><b>3 to 5:1</b>Healthy. Scale carefully.</div>
+          <div><b>5 to 10:1</b>Spend more.</div>
+          <div><b>10:1+</b>Spend hard.</div>
+        </div>
+        <p class="muted" style="font-size:13px;margin-top:10px">One attendee's note: aim for about 8:1 when aggressively scaling a service business.</p>
+      </div>
+      <div class="panel">
+        <h3>How this page scores</h3>
+        <p>The official workbook isn't public, so this is a rebuild from attendee notes and Hormozi's own talks. Each input maps to 0 to 100. Your score blends adders (35%), risk (35%) and the ten pieces (30%).</p>
+        <p>The multiple runs 1x to 10x from that score, capped by size (small EBITDA rarely earns big multiples) and capped at 3x when the business can't run without you. Treat the dollar figure as a direction, not a valuation.</p>
+      </div>
+    </div>
+
+    <div class="sources">
+      <b>Sources</b>
+      <ol>
+        <li><a href="https://www.acquisition.com/ws" target="_blank" rel="noopener">Acquisition.com Scaling Workshop page</a></li>
+        <li><a href="https://boutsalis.substack.com/p/acquisitioncom-scaling-workshop" target="_blank" rel="noopener">George Boutsalis, workshop review (scorecard on day 1)</a></li>
+        <li><a href="https://www.skool.com/acceleratoruniversity/what-i-learned-at-the-acquisitioncom-scaling-workshop-in-las-vegas" target="_blank" rel="noopener">Alexi Drouin, adders, detractors and valuation formula</a></li>
+        <li><a href="https://tubegraph.vercel.app/alexhormozi/building_a_valuable_business" target="_blank" rel="noopener">Hormozi, "I Reverse Engineered the Perfect Business" (10 elements, 9 C's)</a></li>
+        <li><a href="https://dickiebush.substack.com/p/12-takeaways-from-alex-hormozis-scaling" target="_blank" rel="noopener">Dickie Bush, 12 takeaways (multiples, LTV:CAC)</a></li>
+        <li><a href="https://artandbiz.substack.com/p/acquisitioncom-workshop-review-15" target="_blank" rel="noopener">Nicolas Cole, 15 takeaways and the VAM upsell</a></li>
+        <li><a href="https://eugenescaling.pages.dev/" target="_blank" rel="noopener">Eugene Toh, Scaling Workshop field manual (thresholds, bands)</a></li>
+      </ol>
+    </div>
+  </section>
+</div>
+
+<div class="mini" id="mini">
+  <div><b id="miniScore">0</b> <span id="miniTier"></span><br><span id="miniEv"></span></div>
+  <button type="button" id="miniBtn">See report</button>
+</div>
+
+<script>
+(function(){
+const EXAMPLE = {rev:2400000, growth:25, ebitda:480000, retention:72, ltv:6000, cac:900,
+  bigcust:14, topchan:68, market:2, unicorn:1,
+  lead:1, mkt:0, delivery:1, channels:1, recurring:1, metrics:1, financials:1,
+  cs:["Community","Communication","Contracts"]};
+
+const PIECES = [
+  {id:"lead", n:"01", t:"Leadership team runs the day-to-day", why:"Can it hold and grow without you?", o:["I run everything","Some managers, I'm the bottleneck","Leaders own most functions","Team runs and grows it without me"]},
+  {id:"mkt", n:"02", t:"Marketing without the founder", why:"Whose face sells the business?", o:["I'm the face of everything","Mostly me","Me plus team faces","Brand sells without me"]},
+  {id:"delivery", n:"03", t:"Delivery without the founder", why:"Who delivers the core service?", o:["I deliver the core work","I hold the key clients","Team delivers, I escalate","Several experts, no founder needed"]},
+  {id:"channels", n:"04", t:"Multiple reliable acquisition channels", why:"Warm, cold, content, paid. How many actually work?", o:["One channel","One strong, testing others","Two reliable","Three or more reliable"]},
+  {id:"recurring", n:"05", t:"Reliable recurring revenue", why:"Does revenue compound or reset each month?", o:["One-off sales","Some repeat buyers","Mostly recurring","Recurring plus expansion"]},
+  {auto:"diversity", n:"06", t:"Diverse customer base", why:"Scored from your biggest customer share."},
+  {id:"metrics", n:"07", t:"Automated metric tracking", why:"Can you pull CAC, LTV and pipeline in under 30 minutes?", o:["Gut feel","Manual spreadsheets","CRM plus monthly reports","Live automated dashboard"]},
+  {auto:"cashflow", n:"08", t:"Cash flow, profit, growth and a story", why:"Scored from your margin and growth."},
+  {id:"financials", n:"09", t:"Audit-ready financials", why:"Could a third party verify your profit?", o:["DIY or shoebox","Bookkeeper","Accountant, accrual basis","Audit or QoE ready"]},
+  {auto:"scale", n:"10", t:"$5M+ EBITDA", why:"Institutional buyers' size bar. Scored from EBITDA."}
+];
+const CS = [["Consumption","They use it constantly"],["Collateral","Their data or work lives with you"],["Cost of switching","Leaving is painful"],["Choices","Few real alternatives"],["Control","You own the billing"],["Cause","They share your mission"],["Community","They'd lose their tribe"],["Contracts","Committed terms"],["Communication","Regular things to look forward to"]];
+
+const LEVERS = {
+  lead:{t:"Leadership team",m:"Manpower",a:"Hire an experienced operator to own the day-to-day. A-players cost about 25% more and produce several times more."},
+  mkt:{t:"Marketing without you",m:"Manpower",a:"Put other faces in the content. Plan roughly 12 months of joint appearances until they carry the brand alone."},
+  delivery:{t:"Delivery without you",m:"Manpower",a:"Split your role across 2 to 5 specialists, edify them as the experts, and consider small equity to keep them."},
+  channels:{t:"Acquisition channels",m:"More",a:"Do more, then better, on your main channel. Give a second channel to its own owner and track leading metrics."},
+  recurring:{t:"Recurring revenue",m:"Model",a:"Score yourself on the 9 C's and fix the lowest two. Longer billing cycles buy you runway to deliver value."},
+  diversity:{t:"Customer concentration",m:"Model",a:"Grow everyone else faster until no single customer or referrer is over 20% of revenue."},
+  metrics:{t:"Automated metrics",m:"Metrics",a:"Build one live dashboard covering click to close and close to resell. Give it a named owner."},
+  cashflow:{t:"Cash flow and growth",m:"Money",a:"Run a price rise as a two-way-door test. Push the products with the best gross profit and margin."},
+  financials:{t:"Audit-ready books",m:"Money",a:"Move to accrual accounting with a real accountant, then work towards a quality-of-earnings ready close."},
+  unicorn:{t:"Unicorn employee",m:"Manpower",a:"Document and cross-train whatever lives in that one person's head. Checklists beat SOPs."},
+  ltvcac:{t:"Unit economics",m:"Money",a:"Lift lifetime gross profit first. CAC can only fall to zero, LTV has no ceiling."}
+};
+
+const TIERS = [
+  [0,"Blank canvas","A well-paid job, not an asset yet. Buyers would struggle to price it."],
+  [30,"Rough sketch","The shape is there. Too much still runs through you."],
+  [50,"Work in progress","Sellable to the right buyer, at a discount for risk."],
+  [65,"Gallery piece","Investable. A few holes left before premium multiples."],
+  [80,"Masterpiece","Runs without you, compounds, and the numbers prove it."]
+];
+
+const $ = id => document.getElementById(id);
+const lerp = (x, t) => { if (!isFinite(x)) x = 0; if (x <= t[0][0]) return t[0][1]; for (let i=1;i<t.length;i++){ if (x <= t[i][0]) { const [x0,y0]=t[i-1],[x1,y1]=t[i]; return y0+(y1-y0)*(x-x0)/(x1-x0);} } return t[t.length-1][1]; };
+const C4 = [0,35,70,100];
+const avg = a => a.reduce((s,v)=>s+v,0)/a.length;
+const clamp = (v,a,b)=>Math.max(a,Math.min(b,v));
+
+function money(n){ if (!isFinite(n)) return "$0"; const a=Math.abs(n), s=n<0?"-":"";
+  if (a>=1e9) return s+"$"+(a/1e9).toFixed(2)+"B"; if (a>=1e6) return s+"$"+(a/1e6).toFixed(a>=1e7?1:2)+"M"; if (a>=1e3) return s+"$"+Math.round(a/1e3)+"K"; return s+"$"+Math.round(a); }
+function parseMoney(v){ v=String(v||"").trim().toLowerCase().replace(/[$,\s]/g,""); let m=1; if (v.endsWith("m")){m=1e6;v=v.slice(0,-1);} else if (v.endsWith("k")){m=1e3;v=v.slice(0,-1);} else if (v.endsWith("b")){m=1e9;v=v.slice(0,-1);} const n=parseFloat(v); return isFinite(n)?n*m:0; }
+function fmtInput(n){ return n>=1e6 ? (n/1e6)+"m" : n>=1e3 ? (n/1e3)+"k" : String(n); }
+
+/* build pieces + 9 C's */
+const piecesEl = $("pieces");
+PIECES.forEach(p=>{
+  const fs=document.createElement("fieldset"); fs.className="choice";
+  let html=`<legend><span class="num">${p.n}</span>${p.t}</legend><p class="why">${p.why}</p>`;
+  if (p.auto) html+=`<div class="auto"><span>Auto-scored from your numbers</span><b id="auto-${p.auto}">0 / 100</b></div>`;
+  else { html+=`<div class="seg">`+p.o.map((o,i)=>`<input type="radio" name="${p.id}" id="${p.id}${i}" value="${i}"><label for="${p.id}${i}">${o}</label>`).join("")+`</div>`; }
+  fs.innerHTML=html; piecesEl.appendChild(fs);
+});
+$("cs").innerHTML = CS.map((c,i)=>`<input type="checkbox" id="cs${i}" value="${c[0]}"><label for="cs${i}"><b>${c[0]}</b>${c[1]}</label>`).join("");
+
+/* gauge ticks */
+(function(){ let g=""; for(let m=0;m<=10;m+=2){ const a=Math.PI*(1-m/10); const x1=110+76*Math.cos(a), y1=108-76*Math.sin(a), x2=110+68*Math.cos(a), y2=108-68*Math.sin(a), tx=110+56*Math.cos(a), ty=108-56*Math.sin(a)+3;
+  g+=`<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="var(--muted)" stroke-width="1.5"/><text x="${tx.toFixed(1)}" y="${ty.toFixed(1)}" text-anchor="middle">${m}x</text>`; } $("gTicks").innerHTML=g; })();
+
+/* state */
+const KEY="masterpiece-scorecard-v1";
+function readForm(){
+  const r = n => { const el=document.querySelector(`input[name="${n}"]:checked`); return el?+el.value:0; };
+  const s = {rev:parseMoney($("rev").value), growth:+$("growth").value||0, ebitda:parseMoney($("ebitda").value), retention:+$("retention").value||0,
+    ltv:parseMoney($("ltv").value), cac:parseMoney($("cac").value), bigcust:+$("bigcust").value||0, topchan:+$("topchan").value||0,
+    market:r("market"), unicorn:r("unicorn"), cs:[...document.querySelectorAll("#cs input:checked")].map(e=>e.value)};
+  PIECES.forEach(p=>{ if(p.id) s[p.id]=r(p.id); });
+  return s;
+}
+function writeForm(s){
+  ["rev","ebitda","ltv","cac"].forEach(k=>$(k).value=fmtInput(s[k]));
+  ["growth","retention","bigcust","topchan"].forEach(k=>$(k).value=s[k]);
+  ["market","unicorn",...PIECES.filter(p=>p.id).map(p=>p.id)].forEach(n=>{ const el=document.querySelector(`input[name="${n}"][value="${s[n]}"]`); if(el) el.checked=true; });
+  document.querySelectorAll("#cs input").forEach(e=>e.checked=s.cs.includes(e.value));
+}
+
+/* scoring */
+function subScores(s){
+  const ratio = s.cac>0 ? s.ltv/s.cac : (s.ltv>0?20:0);
+  const margin = s.rev>0 ? s.ebitda/s.rev*100 : 0;
+  const csScore = s.cs.length/9*100;
+  const ret = lerp(s.retention, [[0,0],[30,10],[60,40],[80,70],[90,85],[100,95],[115,100]]);
+  const growth = lerp(s.growth, [[-20,0],[0,20],[10,45],[20,70],[40,90],[60,100]]);
+  const marginS = lerp(margin, [[0,0],[10,35],[20,65],[30,90],[40,100]]);
+  const topchanS = lerp(s.topchan, [[0,100],[40,100],[70,50],[90,15],[100,5]]);
+  let cash = 0.5*marginS + 0.5*growth; if (s.ebitda<=0) cash=Math.min(cash,15);
+  return { ratio, margin,
+    revenue: lerp(s.rev, [[0,0],[250e3,10],[1e6,30],[3e6,55],[10e6,80],[30e6,95],[100e6,100]]),
+    growth, ebitdaSize: lerp(s.ebitda, [[0,0],[250e3,15],[1e6,40],[3e6,65],[5e6,85],[10e6,100]]),
+    marginS, retAdd: 0.75*ret + 0.25*csScore,
+    ltvcac: lerp(ratio, [[0,0],[1,10],[3,45],[5,70],[10,92],[15,100]]),
+    lead:C4[s.lead], mkt:C4[s.mkt], delivery:C4[s.delivery],
+    channels: 0.5*topchanS + 0.5*C4[s.channels],
+    recurring: 0.4*C4[s.recurring] + 0.4*ret + 0.2*csScore,
+    diversity: lerp(s.bigcust, [[0,100],[5,100],[10,80],[20,50],[35,20],[50,5],[100,0]]),
+    metrics:C4[s.metrics], cashflow:cash, financials:C4[s.financials],
+    scale: lerp(s.ebitda, [[0,0],[250e3,15],[1e6,40],[3e6,65],[5e6,85],[10e6,100]]),
+    unicorn:[10,40,100][s.unicorn], market:[10,55,100][s.market]
+  };
+}
+function score(s, overrides){
+  const x = Object.assign(subScores(s), overrides||{});
+  if (overrides && overrides.ltvcac!=null) x.ltvcacFixed=true;
+  const adders = {revenue:x.revenue, growth:x.growth, ebitda:x.ebitdaSize, margin:x.marginS, retention:x.retAdd, ltvcac:x.ltvcac};
+  const keyman = avg([x.lead,x.mkt,x.delivery]);
+  const risks = {keyman, unicorn:x.unicorn, customer:x.diversity, channel:x.channels, market:x.market, data:0.6*x.metrics+0.4*x.financials};
+  const elements = {lead:x.lead, mkt:x.mkt, delivery:x.delivery, channels:x.channels, recurring:x.recurring, diversity:x.diversity, metrics:x.metrics, cashflow:x.cashflow, financials:x.financials, scale:x.scale};
+  const S = clamp(0.35*avg(Object.values(adders)) + 0.35*avg(Object.values(risks)) + 0.30*avg(Object.values(elements)),0,100);
+  let mult = 1 + 9*Math.pow(S/100,1.6);
+  let cap = s.ebitda<1e6?4.5 : s.ebitda<3e6?6 : s.ebitda<5e6?8 : 10;
+  if (keyman<35) cap=Math.min(cap,3);
+  mult = Math.min(mult, cap);
+  const ev = s.ebitda>0 ? s.ebitda*mult : 0;
+  return {x, adders, risks, elements, S, mult, cap, keymanCapped:keyman<35, ev};
+}
+
+/* render helpers */
+const band = v => v>=70?"good":v>=45?"warn":"bad";
+let shown = {S:0, ev:0};
+function tween(from,to,ms,fn){ if (matchMedia("(prefers-reduced-motion: reduce)").matches||ms===0){fn(to);return;} const t0=performance.now(); (function f(t){ const k=Math.min(1,(t-t0)/ms), e=1-Math.pow(1-k,3); fn(from+(to-from)*e); if(k<1) requestAnimationFrame(f); })(t0); }
+
+function radar(el){
+  const keys=["lead","mkt","delivery","channels","recurring","diversity","metrics","cashflow","financials","scale"];
+  const lbl=["Leadership","Marketing","Delivery","Channels","Recurring","Customers","Metrics","Cash flow","Financials","Scale"];
+  const cx=200, cy=178, R=118, n=keys.length;
+  const pt=(i,r)=>{const a=-Math.PI/2+i*2*Math.PI/n; return [cx+r*Math.cos(a), cy+r*Math.sin(a)];};
+  let g="";
+  [25,50,75,100].forEach(v=>{ g+=`<polygon class="grid" points="${keys.map((_,i)=>pt(i,R*v/100).map(z=>z.toFixed(1)).join(",")).join(" ")}"/>`; });
+  keys.forEach((_,i)=>{const [x,y]=pt(i,R); g+=`<line class="spoke" x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}"/>`;});
+  [50,100].forEach(v=>{ g+=`<text class="ringlbl" x="${cx+3}" y="${(cy-R*v/100+9).toFixed(1)}">${v}</text>`; });
+  const pts=keys.map((k,i)=>pt(i,R*Math.max(4,el[k])/100));
+  g+=`<polygon class="shape" points="${pts.map(p=>p.map(z=>z.toFixed(1)).join(",")).join(" ")}"/>`;
+  pts.forEach(p=>{ g+=`<circle class="pt" cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="4"/>`; });
+  keys.forEach((k,i)=>{ const [x,y]=pt(i,R+20); const anchor = Math.abs(x-cx)<8?"middle":(x>cx?"start":"end");
+    g+=`<text class="lbl" x="${x.toFixed(1)}" y="${(y+3).toFixed(1)}" text-anchor="${anchor}">${lbl[i]} ${Math.round(el[k])}</text>`; });
+  $("radar").innerHTML=g;
+}
+function bars(id, rows){
+  $(id).innerHTML = rows.map(r=>`<div class="bar"><div class="top"><span>${r.t}</span><b>${r.v}</b></div><div class="track"><div class="fill ${band(r.s)}" style="width:${clamp(r.s,2,100)}%"></div></div>${r.note?`<small>${r.note}</small>`:""}</div>`).join("");
+}
+
+function render(animate){
+  const s=readForm(); const R=score(s); const x=R.x;
+  try{ localStorage.setItem(KEY, JSON.stringify(s)); }catch(e){}
+  $("csCount").textContent=s.cs.length+" / 9";
+  ["diversity","cashflow","scale"].forEach(k=>$("auto-"+k).textContent=Math.round(x[k])+" / 100");
+
+  // tier
+  const tier=[...TIERS].reverse().find(t=>R.S>=t[0]);
+  const tierEl=$("tier");
+  if (tierEl.textContent!==tier[1]){ tierEl.textContent=tier[1]; tierEl.classList.remove("go"); void tierEl.offsetWidth; tierEl.classList.add("go"); }
+  $("tierline").textContent=tier[2];
+  $("miniTier").textContent=tier[1];
+
+  // score ring + ev
+  const from = animate==="reveal"?0:shown.S, fromEv = animate==="reveal"?0:shown.ev;
+  if (animate==="reveal"){ $("ringVal").style.transition="none"; $("ringVal").style.strokeDashoffset=314.16; void $("ringVal").getBoundingClientRect(); $("ringVal").style.transition=""; }
+  requestAnimationFrame(()=>{ $("ringVal").style.strokeDashoffset = 314.16*(1-R.S/100); });
+  tween(from,R.S,animate==="reveal"?1200:400,v=>{ $("ringNum").textContent=Math.round(v); $("miniScore").textContent=Math.round(v); });
+  tween(fromEv,R.ev,animate==="reveal"?1400:400,v=>{ $("ev").textContent=money(v); $("miniEv").textContent="EV "+money(v); });
+  shown={S:R.S, ev:R.ev};
+
+  // gauge
+  $("needle").style.transform=`rotate(${(R.mult/10)*180}deg)`;
+  $("gArc").style.strokeDashoffset = 100-(R.mult/10)*100;
+  $("evsub").innerHTML = s.ebitda>0 ? `${money(s.ebitda)} EBITDA × ${R.mult.toFixed(1)}x` + (R.keymanCapped?`<br>Capped at 3x: runs on you`: R.mult>=R.cap-0.01?`<br>Capped at ${R.cap}x for size`:"") : "No earnings to multiply yet. Buyers pay for profit.";
+
+  // levers: weakest three
+  const levers = Object.keys(LEVERS).map(k=>({k, v:x[k]})).sort((a,b)=>a.v-b.v);
+  const top3 = levers.slice(0,3);
+  const ov={}; top3.forEach(l=>ov[l.k]=100);
+  const U=score(s,ov);
+  const gain=U.ev-R.ev;
+  $("upside").innerHTML = s.ebitda>0
+    ? `Fix your 3 weakest pieces (${top3.map(l=>LEVERS[l.k].t.toLowerCase()).join(", ")}) and the same EBITDA is worth <b>${money(U.ev)}</b>, about <b>+${money(gain)}</b>. Score jumps to ${Math.round(U.S)}.`
+    : `Get to positive EBITDA first. Your weakest pieces: ${top3.map(l=>LEVERS[l.k].t.toLowerCase()).join(", ")}.`;
+
+  const c=LEVERS[levers[0].k];
+  $("cTitle").textContent=c.t; $("cAction").textContent=c.a; $("mBucket").textContent=c.m+" · "+Math.round(levers[0].v)+"/100";
+
+  // push / pause
+  const r=x.ratio; let word, cls, txt;
+  if (r<3){word="Pause";cls="bad";txt="Under 3:1 you're probably losing money on growth. Refine the offer, price and funnel before adding spend.";}
+  else if (r<5){word="Steady";cls="warn";txt="Working economics. Scale carefully and test before you pour fuel on it.";}
+  else if (r<10){word="Push";cls="good";txt="You're leaving money on the table by not spending more on acquisition.";}
+  else {word="Push hard";cls="good";txt="Spend aggressively. You can afford inefficiency as you move into colder audiences.";}
+  $("pushWord").textContent=word; $("ratioPill").className="pill "+cls; $("ratioPill").textContent=(isFinite(r)?r.toFixed(1):"0")+" : 1"; $("pushText").textContent=txt;
+
+  // report
+  radar(R.elements);
+  bars("adders",[
+    {t:"Revenue",v:money(s.rev),s:R.adders.revenue},
+    {t:"Revenue growth",v:s.growth+"%",s:R.adders.growth},
+    {t:"EBITDA",v:money(s.ebitda),s:R.adders.ebitda},
+    {t:"EBITDA margin",v:x.margin.toFixed(0)+"%",s:R.adders.margin},
+    {t:"Revenue retention",v:s.retention+"%",s:R.adders.retention,note:s.retention>=100?"Net negative churn. The holy grail.":""},
+    {t:"LTV : CAC",v:(isFinite(r)?r.toFixed(1):"0")+" : 1",s:R.adders.ltvcac}
+  ]);
+  bars("risks",[
+    {t:"Key person (you)",v:Math.round(R.risks.keyman),s:R.risks.keyman,note:"Hit by a bus test: does it survive 30 days?"},
+    {t:"Unicorn employee",v:Math.round(R.risks.unicorn),s:R.risks.unicorn},
+    {t:"Key customer",v:s.bigcust+"%",s:R.risks.customer,note:"Keep any one customer under 20%. Under 5% is safest."},
+    {t:"Single channel",v:s.topchan+"%",s:R.risks.channel,note:"Over ~70% from one source is a bet, not a strategy."},
+    {t:"Market",v:["Shrinking","Flat","Growing"][s.market],s:R.risks.market},
+    {t:"Data",v:Math.round(R.risks.data),s:R.risks.data,note:"You can't sell what you can't prove."}
+  ]);
+  return R;
+}
+
+/* confetti (poker chips) */
+function chips(){
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const cv=$("confetti"), ctx=cv.getContext("2d"); cv.hidden=false;
+  const W=cv.width=innerWidth*devicePixelRatio, H=cv.height=innerHeight*devicePixelRatio;
+  const cs=getComputedStyle(document.documentElement); const cols=[cs.getPropertyValue("--felt"),cs.getPropertyValue("--gold"),cs.getPropertyValue("--bad")].map(c=>c.trim());
+  const P=Array.from({length:90},()=>({x:Math.random()*W, y:-Math.random()*H*.5, vy:(2+Math.random()*4)*devicePixelRatio, vx:(Math.random()-.5)*2*devicePixelRatio, r:(7+Math.random()*7)*devicePixelRatio, c:cols[Math.floor(Math.random()*3)], s:Math.random()*6, ds:.05+Math.random()*.1}));
+  const t0=performance.now();
+  (function f(t){ ctx.clearRect(0,0,W,H);
+    P.forEach(p=>{ p.x+=p.vx; p.y+=p.vy; p.vy+=.06*devicePixelRatio; p.s+=p.ds; const sx=Math.abs(Math.cos(p.s));
+      ctx.save(); ctx.translate(p.x,p.y); ctx.scale(sx,1); ctx.fillStyle=p.c; ctx.beginPath(); ctx.arc(0,0,p.r,0,7); ctx.fill();
+      ctx.strokeStyle="rgba(255,255,255,.85)"; ctx.lineWidth=p.r*.22; ctx.setLineDash([p.r*.5,p.r*.4]); ctx.beginPath(); ctx.arc(0,0,p.r*.72,0,7); ctx.stroke(); ctx.restore(); });
+    if (t-t0<3200) requestAnimationFrame(f); else { ctx.clearRect(0,0,W,H); cv.hidden=true; } })(t0);
+}
+
+/* wiring */
+let saved=null; try{ saved=JSON.parse(localStorage.getItem(KEY)); }catch(e){}
+writeForm(Object.assign({}, EXAMPLE, saved||{}));
+render();
+$("form").addEventListener("input", ()=>render());
+$("form").addEventListener("change", ()=>render());
+document.querySelectorAll("[data-money]").forEach(i=>i.addEventListener("blur",()=>{ i.value=fmtInput(parseMoney(i.value)); }));
+$("reset").addEventListener("click",()=>{ writeForm(EXAMPLE); render("reveal"); });
+$("reveal").addEventListener("click",()=>{
+  const R=render("reveal");
+  if (innerWidth<=980) $("report").scrollIntoView({behavior:"smooth"}); else window.scrollTo({top:0,behavior:"smooth"});
+  if (R.S>=65) setTimeout(chips, 900);
+});
+$("miniBtn").addEventListener("click",()=>$("report").scrollIntoView({behavior:"smooth"}));
+})();
+</script>
+
+</body></html>
